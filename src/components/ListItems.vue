@@ -5,8 +5,14 @@ const emit = defineEmits(["itemSelected"]);
 let selectedItem:any = undefined
 let selectedIndex = undefined
 const selectItem = (item,index) => {
+  if (item == undefined){
+    return
+  }
     if (selectedIndex != undefined){
-      props.items[selectedIndex].selected = false
+      if (selectedIndex < props.items.length){
+        props.items[selectedIndex].selected = false
+      }
+      
     }
     item.selected = true;
     selectedItem = item;

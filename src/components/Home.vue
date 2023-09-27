@@ -12,6 +12,22 @@ const prefixes = ref([])
 const s3prefix = ref(undefined)
 const selectedFile = ref(undefined)
 
+const prefixClicked = (prefixIndex,prefix) => {
+  console.log(prefixIndex)
+  
+  prefixes.value = prefixes.value.splice(0,prefixIndex+1)
+  s3prefix.value = prefixes.value.join("/")
+  console.log(prefixes)
+}
+
+const bucketClicked = (bucketName) => {
+  console.log(bucketName)
+  
+  prefixes.value = []
+  s3prefix.value = undefined
+  console.log(prefixes)
+}
+
 
 const bucketSelected = (bucketName:string) => {
   console.log(bucketName)
@@ -25,7 +41,7 @@ const keySelected = (keyName: string,isLeaf:boolean) => {
     console.log(s3prefix.value)
   }
   else {
-    selectedFile.value = `s3://${s3bucket.value}/${s3prefix.value}/${keyName}`
+    selectedFile.value = `${s3prefix.value}/${keyName}`
   }
 }
 
@@ -34,7 +50,7 @@ const keySelected = (keyName: string,isLeaf:boolean) => {
 <template>
   <div class="home-view">
     <el-row>
-      <S3Url :s3bucket='s3bucket' :prefixes='prefixes'/>
+      <S3Url @prefix-clicked="prefixClicked" @bucket-clicked="bucketClicked" :s3bucket='s3bucket' :prefixes='prefixes'/>
     </el-row>
     <el-row>
       <el-col :span="5">
@@ -45,8 +61,8 @@ const keySelected = (keyName: string,isLeaf:boolean) => {
             <S3Prefixes :s3bucket="s3bucket" :s3prefix="s3prefix" @key-selected="keySelected" />
         </div>
       </el-col>
-      <el-col :span="18">
-        <S3FileEditor :s3url="selectedFile"/>
+      <el-col :span="19">
+        <S3FileEditor :s3bucket="s3bucket" :s3url="selectedFile"/>
       </el-col>
     </el-row>
   </div>

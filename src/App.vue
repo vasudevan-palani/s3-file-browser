@@ -38,12 +38,6 @@ export default defineComponent({
 
 <template>
   <el-row>
-    <el-col :span="24">
-      <el-text type="danger">{{error_message}}</el-text>
-      <el-text type="success">{{message}}</el-text>
-    </el-col>
-  </el-row>
-  <el-row>
     <el-col :span="1">
       <el-row class="menu-button">
         <el-button type="primary" @click="gotoAwsSettings" :icon="SettingsIcon" circle />

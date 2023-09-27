@@ -30,7 +30,7 @@ onMounted(() => {
     let childItems = [];
 
     for (let i = 0; i < data.Buckets.length; i++) {
-      childItems.push({ Name: data.Buckets[i].Name });
+      childItems.push({ Name: data.Buckets[i].Name,isLeaf:false });
     }
 
     items.value = childItems;

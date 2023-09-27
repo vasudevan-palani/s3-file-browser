@@ -1,20 +1,35 @@
 <script setup lang="ts">
 import { reactive, ref, watchEffect } from "vue";
 import VueJsoneditor from "vue3-ts-jsoneditor";
+import { VAceEditor } from 'vue3-ace-editor';
+import 'ace-builds/src-noconflict/mode-json';
+import 'ace-builds/src-noconflict/theme-chrome';
+import workerJsonUrl from 'ace-builds/src-noconflict/worker-json?url'; // For vite
+import ace from 'ace-builds';
+import themeChromeUrl from 'ace-builds/src-noconflict/theme-chrome?url';
+ace.config.setModuleUrl('ace/theme/chrome', themeChromeUrl);
+ace.config.setModuleUrl('ace/mode/json_worker', workerJsonUrl);
 import { UserIcon, CheckIcon } from "@vue-icons/feather";
+
+
+// Init aws
+//
 const AWS = require("aws-sdk");
 AWS.config.update({
   profile: process.env.AWS_PROFILE,
 });
 
+// reactive variables
+//
 const message = ref("");
-
 const isSaveDisabled = ref(true);
-
 const errorMessage = ref("");
+const filetype = ref("unknown")
 
 const s3 = new AWS.S3();
 
+// Properties
+//
 const props = defineProps({
   s3url: {
     type: String,
@@ -26,13 +41,43 @@ const props = defineProps({
 
 let updatedContent:any = undefined
 
-const json = ref({ name: "value" });
+const json = ref('{ name: "value" }');
 
+// functions
+//
+const getFileType = (url:string)=>{
+  if (url.endsWith(".json")){
+    return "json"
+  }
+  if(url.endsWith(".js")){
+    return "javascript"
+  }
+  if(url.endsWith(".py")){
+    return "python"
+  }
+  if(url.endsWith("xml")){
+    return "xml"
+  }
+  if(url.endsWith("yml") || url.endsWith("yaml")){
+    return "yaml"
+  }
+  return "unknown"
+}
+
+// handlers
+//
 const saveContent = () => {
   console.log(updatedContent);
   isSaveDisabled.value = true
   message.value = "Saving...."
   errorMessage.value = ""
+
+  if(updatedContent == undefined || updatedContent == ""){
+    console.log("Invalid content");
+    message.value = ""
+    errorMessage.value = "Invalid Content"
+  }
+
   s3.putObject(
     {
       Bucket: props.s3bucket,
@@ -54,16 +99,30 @@ const saveContent = () => {
   );
 };
 
-const onChange = (content:any) => {
-  console.log(content);
+const onJsonChange = (content:any) => {
+  console.log(content.text);
   updatedContent = content.text
 };
 
+const onChange = (content:any) => {
+  console.log(content);
+  updatedContent = content
+};
+
+
+
+// watchers
+//
 watchEffect(() => {
   if (props.s3bucket == undefined || props.s3url == undefined) {
     return;
   }
 
+  filetype.value = getFileType(props.s3url)
+
+  if (filetype.value == "unknown"){
+    return
+  }
   s3.getObject(
     {
       Bucket: props.s3bucket,
@@ -106,12 +165,14 @@ watchEffect(() => {
     <el-text type="success">{{ message }}</el-text>
   </div>
   <div class="s3editor">
-    <vue-jsoneditor
+    <v-ace-editor v-if="filetype !='unknown' && filetype !='json'" v-model:value="json" @update:value="onChange" lang="filetype" :options="{ useWorker: true }" style="height: 720px" />
+    <vue-jsoneditor v-else-if="filetype =='json'"
       height="725"
       mode="text"
       v-model:text="json"
-      @change="onChange"
+      @change="onJsonChange"
     />
+    <el-text v-else> Please select a file or unknown file type </el-text>
   </div>
 </template>
 

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { reactive, ref, watchEffect, onMounted } from "vue";
+import { FolderIcon,FileIcon } from "@vue-icons/feather";
 const props = defineProps<{ items: [] }>();
 const emit = defineEmits(["itemSelected"]);
 let selectedItem:any = undefined
@@ -32,9 +33,10 @@ const truncateText = (text, maxLength) => {
 <template>
   <div class="files">
     <div v-for="(item, index) in items">
-      <el-link :type="item.selected ? 'primary' : ''" @click="() => selectItem(item,index)" :underline="false"
-        :title="item.Name">{{ index + 1 }}.{{ truncateText(item.Name,30) }}</el-link
-      >
+      <el-link v-if="item.isLeaf == false" :icon="FolderIcon" :type="item.selected ? 'primary' : ''" @click="() => selectItem(item,index)" :underline="false"
+        :title="item.Name">&nbsp;&nbsp;{{ truncateText(item.Name,30) }}</el-link>
+        <el-link v-if="item.isLeaf == true" :icon="FileIcon" :type="item.selected ? 'primary' : ''" @click="() => selectItem(item,index)" :underline="false"
+        :title="item.Name">&nbsp;&nbsp;{{ truncateText(item.Name,30) }}</el-link>
     </div>
   </div>
 </template>

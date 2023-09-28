@@ -7,12 +7,12 @@ import S3Buckets from "./S3Buckets.vue"
 import S3Prefixes from "./S3Prefixes.vue"
 import S3FileEditor from "./S3FileEditor.vue";
 
-const s3bucket = ref(undefined)
-const prefixes = ref([])
-const s3prefix = ref(undefined)
-const selectedFile = ref(undefined)
+const s3bucket = ref<string|undefined>(undefined)
+const prefixes = ref<string[]>([])
+const s3prefix = ref<string|undefined>(undefined)
+const selectedFile = ref<string|undefined>(undefined)
 
-const prefixClicked = (prefixIndex,prefix) => {
+const prefixClicked = (prefixIndex:number,prefix:string) => {
   console.log(prefixIndex)
   
   prefixes.value = prefixes.value.splice(0,prefixIndex+1)
@@ -20,7 +20,7 @@ const prefixClicked = (prefixIndex,prefix) => {
   console.log(prefixes)
 }
 
-const bucketClicked = (bucketName) => {
+const bucketClicked = (bucketName:string) => {
   console.log(bucketName)
   
   prefixes.value = []

@@ -7,10 +7,15 @@ export default defineComponent({
     },
     setup(){
         const router = useRouter()
+        router.push('/');
         const error_message = ref("")
         const message = ref("Message")
         const gotoAwsSettings = () => {
             router.push('/settings/aws'); // Replace '/about' with the path you want to navigate to      
+        }
+
+        const gotoFolder = () => {
+            router.push('/home'); // Replace '/about' with the path you want to navigate to      
         }
 
         const showMessage=(msg:string) =>{
@@ -27,6 +32,7 @@ export default defineComponent({
             showErrorMessage : showErrorMessage,
             error_message : error_message,
             message : message,
+            gotoFolder : gotoFolder,
             gotoAwsSettings : gotoAwsSettings,
             SettingsIcon: SettingsIcon,
             FileIcon : FileIcon
@@ -43,7 +49,7 @@ export default defineComponent({
         <el-button type="primary" @click="gotoAwsSettings" :icon="SettingsIcon" circle />
       </el-row>
       <el-row class="menu-button">
-        <el-button type="primary" :icon="FileIcon" circle />
+        <el-button type="primary" :icon="FileIcon" @click="gotoFolder" circle />
       </el-row>
     </el-col>
     <el-col :span="23">

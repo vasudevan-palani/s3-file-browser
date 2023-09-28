@@ -12,11 +12,11 @@ const props = defineProps({
 
 const full_url = ref("s3://");
 
-const prefixClicked = (prefixIndex,prefix)=>{
+const prefixClicked = (prefixIndex:number,prefix:string)=>{
     emit('prefixClicked',prefixIndex,prefix)
 }
 
-const bucketClicked = (s3bucket)=>{
+const bucketClicked = (s3bucket:string)=>{
     emit('bucketClicked',s3bucket)
 }
 
@@ -39,7 +39,7 @@ watchEffect(async () => {
     <div class="filepath">
         <el-text>File : </el-text>
         <el-link v-if="s3bucket" @click="bucketClicked(s3bucket)">s3://{{s3bucket}}/</el-link>
-        <span v-if="prefixes" v-for="(prefix,prefixIndex) in prefixes"><el-link @click="prefixClicked(prefixIndex,prefix)">{{prefix}}/</el-link></span>
+        <span v-if="prefixes" v-for="(prefix,prefixIndex) in prefixes"><el-link @click="prefixClicked(prefixIndex,String(prefix))">{{prefix}}/</el-link></span>
     </div>
 </template>
 

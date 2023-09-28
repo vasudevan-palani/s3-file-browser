@@ -17,11 +17,15 @@ import Home from './components/Home.vue'
 const routes = [
   {
     path: '/',
-    component: Home,
+    component: Aws,
   },
   {
     path: '/input',
     component: Inputs,
+  },
+  {
+    path: '/home',
+    component: Home,
   },
   {
     path: '/settings/aws',

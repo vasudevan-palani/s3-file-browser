@@ -1,14 +1,11 @@
 <script setup lang="ts">
 import { reactive, ref, watchEffect, onMounted, watch, onUpdated } from "vue";
 import ListItems from "./ListItems.vue";
+import Credentials from "../services/aws";
 
 // AWS Initialization
 //
 const AWS = require("aws-sdk");
-AWS.config.update({
-  profile: process.env.AWS_PROFILE,
-});
-const s3 = new AWS.S3();
 
 //Inputs and Outputs declarations
 //
@@ -26,7 +23,7 @@ const props = defineProps({
 //Variables
 //
 
-const items = ref([]);
+const items = ref<any[]>([]);
 
 // handlers
 //
@@ -38,14 +35,22 @@ const itemSelected = (item: any) => {
 // resuable functions
 //
 
-const getS3Items = (s3bucket,s3prefix) => {
-  let params = {
+const getS3Items = (s3bucket:string|undefined,s3prefix:string|undefined) => {
+
+  AWS.config.update({
+    accessKeyId: Credentials.getAccessKey(),
+    secretAccessKey: Credentials.getSecretKey()
+  });
+  const s3 = new AWS.S3();
+
+
+  let params:any = {
     "Bucket" : s3bucket
   }
   if (s3prefix != undefined && s3prefix != ""){
     params["Prefix"] = s3prefix
   }
-  s3.listObjectsV2(params, (err, data) => {
+  s3.listObjectsV2(params, (err:any, data:any) => {
     if (err) {
       console.log(err);
       return;

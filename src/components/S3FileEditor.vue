@@ -10,14 +10,11 @@ import themeChromeUrl from 'ace-builds/src-noconflict/theme-chrome?url';
 ace.config.setModuleUrl('ace/theme/chrome', themeChromeUrl);
 ace.config.setModuleUrl('ace/mode/json_worker', workerJsonUrl);
 import { UserIcon, CheckIcon } from "@vue-icons/feather";
-
+import Credentials from "../services/aws";
 
 // Init aws
 //
 const AWS = require("aws-sdk");
-AWS.config.update({
-  profile: process.env.AWS_PROFILE,
-});
 
 // reactive variables
 //
@@ -25,8 +22,6 @@ const message = ref("");
 const isSaveDisabled = ref(true);
 const errorMessage = ref("");
 const filetype = ref("unknown")
-
-const s3 = new AWS.S3();
 
 // Properties
 //
@@ -67,6 +62,13 @@ const getFileType = (url:string)=>{
 // handlers
 //
 const saveContent = () => {
+
+  AWS.config.update({
+    accessKeyId: Credentials.getAccessKey(),
+    secretAccessKey: Credentials.getSecretKey()
+  });
+  const s3 = new AWS.S3();
+
   console.log(updatedContent);
   isSaveDisabled.value = true
   message.value = "Saving...."
@@ -123,12 +125,19 @@ watchEffect(() => {
   if (filetype.value == "unknown"){
     return
   }
+
+  AWS.config.update({
+    accessKeyId: Credentials.getAccessKey(),
+    secretAccessKey: Credentials.getSecretKey()
+  });
+  const s3 = new AWS.S3();
+
   s3.getObject(
     {
       Bucket: props.s3bucket,
       Key: props.s3url,
     },
-    (err, data) => {
+    (err:any, data:any) => {
       if (err) {
         console.error("Error getting JSON object from S3:", err);
         return;

@@ -1,11 +1,11 @@
 <script setup lang="ts">
 import { reactive, ref, watchEffect, onMounted } from "vue";
 import { FolderIcon,FileIcon } from "@vue-icons/feather";
-const props = defineProps<{ items: [] }>();
-const emit = defineEmits(["itemSelected"]);
+const props = defineProps<{ items: any[],hasMore:boolean }>();
+const emit = defineEmits(["itemSelected","clickedMore"]);
 let selectedItem:any = undefined
-let selectedIndex = undefined
-const selectItem = (item,index) => {
+let selectedIndex:number|undefined = undefined
+const selectItem = (item:any,index:number) => {
   if (item == undefined){
     return
   }
@@ -21,7 +21,11 @@ const selectItem = (item,index) => {
     selectedIndex = index
 }
 
-const truncateText = (text, maxLength) => {
+const onClickedMore = ()=>{
+  emit('clickedMore');
+}
+
+const truncateText = (text:string, maxLength:number) => {
       if (text.length <= maxLength) {
         return text; // Return the original text if it's shorter than or equal to maxLength
       } else {
@@ -37,6 +41,9 @@ const truncateText = (text, maxLength) => {
         :title="item.Name">&nbsp;&nbsp;{{ truncateText(item.Name,30) }}</el-link>
         <el-link v-if="item.isLeaf == true" :icon="FileIcon" :type="item.selected ? 'primary' : ''" @click="() => selectItem(item,index)" :underline="false"
         :title="item.Name">&nbsp;&nbsp;{{ truncateText(item.Name,30) }}</el-link>
+    </div>
+    <div>
+      <el-link v-if="hasMore" @clicked="onClickedMore">More..</el-link>
     </div>
   </div>
 </template>

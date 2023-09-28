@@ -1,18 +1,17 @@
 <script setup lang="ts">
 import { reactive, ref, watchEffect, onMounted } from "vue";
 import ListItems from './ListItems.vue'
+
+import Credentials from "../services/aws";
+
 const emit = defineEmits(["bucketSelected"]);
-const items = ref([]);
+const items = ref<any[]>([]);
 
 const selectedItem = ref({});
 
 const selectItem = (item: any) => {};
 
 const AWS = require("aws-sdk");
-AWS.config.update({
-  profile: process.env.AWS_PROFILE,
-});
-const s3 = new AWS.S3();
 
 const itemSelected = (item:any)=>{
     selectedItem.value = item
@@ -20,6 +19,11 @@ const itemSelected = (item:any)=>{
 }
 
 onMounted(() => {
+  AWS.config.update({
+    accessKeyId: Credentials.getAccessKey(),
+    secretAccessKey: Credentials.getSecretKey()
+  });
+  const s3 = new AWS.S3();
   console.log("in onmounted")
   s3.listBuckets({}, (err: any, data: any) => {
     if (err) {

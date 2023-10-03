@@ -43,7 +43,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <ListItems :items="items" @item-selected="itemSelected"/>
+  <ListItems :has-more="false" :items="items" @item-selected="itemSelected"/>
 </template>
 
 <style scoped>

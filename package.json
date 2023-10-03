@@ -1,6 +1,6 @@
 {
   "name": "s3_browser_app",
-  "version": "2.0.0",
+  "version": "1.0.0",
   "main": "dist-electron/main/index.js",
   "description": "S3 browser app",
   "author": "vasudevan.palani@gmail.com",

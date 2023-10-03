@@ -20,6 +20,9 @@ const indexHtml = node_path.join(process.env.DIST, "index.html");
 async function createWindow() {
   win = new electron.BrowserWindow({
     title: "Main window",
+    titleBarStyle: "hidden",
+    width: 1280,
+    height: 720,
     icon: node_path.join(process.env.VITE_PUBLIC, "favicon.ico"),
     webPreferences: {
       preload,
@@ -29,6 +32,10 @@ async function createWindow() {
       nodeIntegration: true,
       contextIsolation: false
     }
+  });
+  win.setMinimumSize(1280, 720);
+  win.on("closed", () => {
+    win = null;
   });
   if (process.env.VITE_DEV_SERVER_URL) {
     win.loadURL(url);
@@ -45,7 +52,16 @@ async function createWindow() {
     return { action: "deny" };
   });
 }
-electron.app.whenReady().then(createWindow);
+electron.app.whenReady().then(() => {
+  createWindow();
+  electron.ipcMain.on("dblclick-navbar", () => {
+    if (win.isMaximized()) {
+      win.unmaximize();
+    } else {
+      win.maximize();
+    }
+  });
+});
 electron.app.on("window-all-closed", () => {
   win = null;
   if (process.platform !== "darwin")

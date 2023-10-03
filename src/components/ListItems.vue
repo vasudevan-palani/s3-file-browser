@@ -22,6 +22,7 @@ const selectItem = (item:any,index:number) => {
 }
 
 const onClickedMore = ()=>{
+  console.log("ListItems::onClickedMore")
   emit('clickedMore');
 }
 
@@ -37,13 +38,13 @@ const truncateText = (text:string, maxLength:number) => {
 <template>
   <div class="files">
     <div v-for="(item, index) in items">
-      <el-link v-if="item.isLeaf == false" :icon="FolderIcon" :type="item.selected ? 'primary' : ''" @click="() => selectItem(item,index)" :underline="false"
+      <el-link v-if="item.isLeaf == false" :icon="FolderIcon" :type="item.selected ? 'primary' : 'default'" @click="() => selectItem(item,index)" :underline="false"
         :title="item.Name">&nbsp;&nbsp;{{ truncateText(item.Name,30) }}</el-link>
-        <el-link v-if="item.isLeaf == true" :icon="FileIcon" :type="item.selected ? 'primary' : ''" @click="() => selectItem(item,index)" :underline="false"
+        <el-link v-if="item.isLeaf == true" :icon="FileIcon" :type="item.selected ? 'primary' : 'default'" @click="() => selectItem(item,index)" :underline="false"
         :title="item.Name">&nbsp;&nbsp;{{ truncateText(item.Name,30) }}</el-link>
     </div>
     <div>
-      <el-link v-if="hasMore" @clicked="onClickedMore">More..</el-link>
+      <el-link v-if="hasMore" type="primary" @click="onClickedMore">More..</el-link>
     </div>
   </div>
 </template>

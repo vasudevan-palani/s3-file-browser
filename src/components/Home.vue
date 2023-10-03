@@ -20,6 +20,12 @@ const prefixClicked = (prefixIndex:number,prefix:string) => {
   console.log(prefixes)
 }
 
+const onResetAll = () => {
+  prefixes.value = []
+  s3prefix.value = undefined
+  s3bucket.value = undefined
+}
+
 const bucketClicked = (bucketName:string) => {
   console.log(bucketName)
   
@@ -41,7 +47,16 @@ const keySelected = (keyName: string,isLeaf:boolean) => {
     console.log(s3prefix.value)
   }
   else {
-    selectedFile.value = `${s3prefix.value}/${keyName}`
+    console.log(s3prefix.value)
+    if (s3prefix.value != undefined && s3prefix.value != null && s3prefix.value != ""){
+      selectedFile.value = `${s3prefix.value}/${keyName}`
+    }
+    else{
+      selectedFile.value = `${keyName}`
+    }
+    console.log(keyName)
+    console.log(selectedFile.value)
+    
   }
 }
 
@@ -50,7 +65,7 @@ const keySelected = (keyName: string,isLeaf:boolean) => {
 <template>
   <div class="home-view">
     <el-row>
-      <S3Url @prefix-clicked="prefixClicked" @bucket-clicked="bucketClicked" :s3bucket='s3bucket' :prefixes='prefixes'/>
+      <S3Url @on-reset-all="onResetAll" @prefix-clicked="prefixClicked" @bucket-clicked="bucketClicked" :s3bucket='s3bucket' :prefixes='prefixes'/>
     </el-row>
     <el-row>
       <el-col :span="5">

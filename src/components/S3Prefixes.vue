@@ -25,17 +25,26 @@ const props = defineProps({
 
 const items = ref<any[]>([]);
 
+const hasMore = ref<boolean>(false)
+
+const nextToken = ref<string>("")
+
 // handlers
 //
 const itemSelected = (item: any) => {
   emit("keySelected", item.Name, item.isLeaf);
 };
 
+const onClickedMore = () => {
+  console.log("S3Prefixes::onClickedMore")
+  getS3Items(props.s3bucket,props.s3prefix,nextToken.value)
+}
+
 
 // resuable functions
 //
 
-const getS3Items = (s3bucket:string|undefined,s3prefix:string|undefined) => {
+const getS3Items = (s3bucket:string|undefined,s3prefix:string|undefined,continuationToken:string) => {
 
   AWS.config.update({
     accessKeyId: Credentials.getAccessKey(),
@@ -50,6 +59,11 @@ const getS3Items = (s3bucket:string|undefined,s3prefix:string|undefined) => {
   if (s3prefix != undefined && s3prefix != ""){
     params["Prefix"] = s3prefix
   }
+
+  if (continuationToken != ""){
+    params["ContinuationToken"] = continuationToken
+  }
+  console.log(params)
   s3.listObjectsV2(params, (err:any, data:any) => {
     if (err) {
       console.log(err);
@@ -58,6 +72,14 @@ const getS3Items = (s3bucket:string|undefined,s3prefix:string|undefined) => {
     console.log(data);
 
     let childItems = [];
+    if (data.NextContinuationToken != undefined && data.NextContinuationToken != null){
+      hasMore.value = true
+      nextToken.value = data.NextContinuationToken
+    }
+    else {
+      hasMore.value = false
+      nextToken.value = ""
+    }
     for (let i = 0; i < data.Contents.length; i++) {
       let filekey = data.Contents[i].Key;
       console.log(filekey);
@@ -72,14 +94,20 @@ const getS3Items = (s3bucket:string|undefined,s3prefix:string|undefined) => {
           childItems.push({ Name: keyItem, isLeaf: false });
         }
       } else {
-        childItems.push({ Name: filekey, isLeaf: true });
+        if(filekey != undefined && filekey != null && filekey != ""){
+          childItems.push({ Name: filekey, isLeaf: true });
+        }
+        
       }
     }
     const uniqueArray = childItems.filter(
       (obj, index, self) => self.findIndex((o) => o.Name === obj.Name) === index
     );
     console.log(uniqueArray)
-    items.value =  uniqueArray;
+    if(continuationToken == ""){
+      items.value = []
+    }
+    items.value = items.value.concat(uniqueArray)
     
   });
 };
@@ -87,17 +115,17 @@ const getS3Items = (s3bucket:string|undefined,s3prefix:string|undefined) => {
 //lifecycles and watches
 //
 onMounted(() => {
-  getS3Items(props.s3bucket,props.s3prefix)
+  getS3Items(props.s3bucket,props.s3prefix,"")
 });
 
 watchEffect(() => {
-  getS3Items(props.s3bucket,props.s3prefix)
+  getS3Items(props.s3bucket,props.s3prefix,"")
 });
 
 </script>
 
 <template>
-  <ListItems :items="items" @item-selected="itemSelected" />
+  <ListItems :has-more="hasMore" @clicked-more="onClickedMore" :items="items" @item-selected="itemSelected" />
 </template>
 
 <style scoped>

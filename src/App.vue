@@ -2,6 +2,8 @@
 import { ref, defineComponent } from 'vue';
 import { SettingsIcon, FileIcon } from '@vue-icons/feather';
 import { useRouter, useRoute } from 'vue-router';
+const { ipcRenderer } = require('electron');
+
 export default defineComponent({
     props : {
     },
@@ -27,11 +29,16 @@ export default defineComponent({
           error_message.value = msg
         }
 
+        const  dblclickNavBar = () => {
+          ipcRenderer.send('dblclick-navbar');
+        }
+
         return {
             showMessage : showMessage,
             showErrorMessage : showErrorMessage,
             error_message : error_message,
             message : message,
+            dblclickNavBar: dblclickNavBar,
             gotoFolder : gotoFolder,
             gotoAwsSettings : gotoAwsSettings,
             SettingsIcon: SettingsIcon,
@@ -43,14 +50,17 @@ export default defineComponent({
 </script>
 
 <template>
-  <el-row>
+  <el-row v-on:dblclick="dblclickNavBar" class="nav-bar">
+    <el-col :span="24">
+      <p  class="title"> S3 File Browser</p>
+    </el-col>
+  </el-row>
+  <el-row class="body-container">
     <el-col :span="1">
-      <el-row class="menu-button">
-        <el-button type="primary" @click="gotoAwsSettings" :icon="SettingsIcon" circle />
-      </el-row>
-      <el-row class="menu-button">
-        <el-button type="primary" :icon="FileIcon" @click="gotoFolder" circle />
-      </el-row>
+        <el-button class="left-menu-buttons" type="primary" @click="gotoAwsSettings" :icon="SettingsIcon" circle />
+        <div class="menu-button-label">Settings</div>
+        <el-button class="left-menu-buttons" type="primary" :icon="FileIcon" @click="gotoFolder" circle />
+        <div class="menu-button-label">Files</div>
     </el-col>
     <el-col :span="23">
       <div  class="home-area">
@@ -62,6 +72,28 @@ export default defineComponent({
 </template>
 
 <style>
+.nav-buttons{
+  vertical-align: middle;
+}
+.title{
+  color: white;
+  cursor: default;
+  
+}
+.menu-button-label{
+  align-items: center;
+  margin-bottom: 20px;
+}
+.body-container{
+  padding: 1rem;
+}
+.nav-bar{
+  background-color: #409eff;
+  height: 50px;
+  -webkit-app-region : "drag";
+  user-select: none;
+  -webkit-user-select: none;
+}
 .flex-center {
   display: flex;
   align-items: center;
@@ -77,6 +109,14 @@ export default defineComponent({
 
 .logo.electron:hover {
   filter: drop-shadow(0 0 2em #9FEAF9);
+}
+
+
+.left-menu-buttons{
+  padding:20px!important;
+  height: 65px;
+  font-size: 1.5em;
+  
 }
 
 .logo:hover {

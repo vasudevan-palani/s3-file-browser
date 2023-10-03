@@ -56,6 +56,12 @@ const getFileType = (url:string)=>{
   if(url.endsWith("yml") || url.endsWith("yaml")){
     return "yaml"
   }
+  if(url.endsWith("txt") || url.endsWith("text")){
+    return "txt"
+  }
+  if(url.endsWith("csv")){
+    return "csv"
+  }
   return "unknown"
 }
 

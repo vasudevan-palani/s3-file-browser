@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { reactive, ref, watchEffect } from "vue";
-const emit = defineEmits(["prefixClicked","bucketClicked"]);
+const emit = defineEmits(["prefixClicked","bucketClicked","onResetAll"]);
 const props = defineProps({
     s3bucket :{
         type : String
@@ -11,6 +11,10 @@ const props = defineProps({
 });
 
 const full_url = ref("s3://");
+
+const resetAll = () => {
+    emit('onResetAll');
+}
 
 const prefixClicked = (prefixIndex:number,prefix:string)=>{
     emit('prefixClicked',prefixIndex,prefix)
@@ -38,7 +42,8 @@ watchEffect(async () => {
 <template>
     <div class="filepath">
         <el-text>File : </el-text>
-        <el-link v-if="s3bucket" @click="bucketClicked(s3bucket)">s3://{{s3bucket}}/</el-link>
+        <el-link @click="resetAll()">s3://</el-link>
+        <el-link v-if="s3bucket" @click="bucketClicked(s3bucket)">{{s3bucket}}/</el-link>
         <span v-if="prefixes" v-for="(prefix,prefixIndex) in prefixes"><el-link @click="prefixClicked(prefixIndex,String(prefix))">{{prefix}}/</el-link></span>
     </div>
 </template>

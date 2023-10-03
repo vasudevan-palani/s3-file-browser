@@ -43,6 +43,9 @@ const indexHtml = join(process.env.DIST, 'index.html')
 async function createWindow() {
   win = new BrowserWindow({
     title: 'Main window',
+    titleBarStyle: 'hidden',
+    width:1280,
+    height:720,
     icon: join(process.env.VITE_PUBLIC, 'favicon.ico'),
     webPreferences: {
       preload,
@@ -53,6 +56,13 @@ async function createWindow() {
       contextIsolation: false,
     },
   })
+
+  win.setMinimumSize(1280, 720)
+
+
+  win.on('closed', () => {
+    win = null;
+  });
 
   if (process.env.VITE_DEV_SERVER_URL) { // electron-vite-vue#298
     win.loadURL(url)
@@ -75,7 +85,20 @@ async function createWindow() {
   // win.webContents.on('will-navigate', (event, url) => { }) #344
 }
 
-app.whenReady().then(createWindow)
+app.whenReady().then(()=>{
+  createWindow()
+  ipcMain.on('dblclick-navbar', () => {
+    if(win.isMaximized())
+    {
+      win.unmaximize();
+    }
+    else{
+      win.maximize();
+    }
+    
+  });
+})
+
 
 app.on('window-all-closed', () => {
   win = null

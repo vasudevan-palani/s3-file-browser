@@ -7,6 +7,17 @@ const os = require("os");
 import Credentials from "../../services/aws";
 const ini = require('multi-ini');
 
+interface AWSProfileData{
+  aws_access_key_id:string
+  aws_secret_access_key: string
+  default_region: string
+}
+
+interface AwsProfile {
+  label : string
+  value : AWSProfileData
+}
+
 defineProps<{ msg: string }>();
 const emit = defineEmits(["showMessage"]);
 const router = useRouter();
@@ -15,8 +26,8 @@ const aws_profile = ref<string>("");
 const aws_access_key_id = ref<string>("");
 const aws_secret_access_key = ref<string>("");
 const default_region = ref<string>("us-east-1");
-const selected_profile = ref<string>("");
-const aws_profiles = ref<[]>([]);
+const selected_profile = ref<AWSProfileData>();
+const aws_profiles = ref<AwsProfile[]>([]);
 const activeName = ref("profile");
 
 const saveAwsSettings = () => {
@@ -62,7 +73,7 @@ onBeforeMount(() => {
             "value":{
               "aws_access_key_id":content[profileName].aws_access_key_id,
               "aws_secret_access_key":content[profileName].aws_secret_access_key,
-              "aws_default_region":content[profileName].aws_default_region  
+              "default_region":content[profileName].aws_default_region  
             },
             "label":profileName,
             
@@ -98,9 +109,9 @@ const handleTabClick = () => {
 
 const saveAwsProfileSettings = () => {
   console.log(selected_profile.value)
-  aws_access_key_id.value = selected_profile.value.aws_access_key_id
-  aws_secret_access_key.value = selected_profile.value.aws_secret_access_key
-  default_region.value = selected_profile.value.default_region == undefined ? "us-east-1" : selected_profile.value.default_region
+  aws_access_key_id.value = selected_profile.value?.aws_access_key_id != undefined ? String(selected_profile.value?.aws_access_key_id) : ""
+  aws_secret_access_key.value = selected_profile.value?.aws_secret_access_key != undefined ? String(selected_profile.value?.aws_secret_access_key) : ""
+  default_region.value = selected_profile.value?.default_region == undefined ? "us-east-1" : selected_profile.value?.default_region
 
   saveAwsSettings()
 }

@@ -2,6 +2,14 @@
 const electron = require("electron");
 const node_os = require("node:os");
 const node_path = require("node:path");
+require("update-electron-app")();
+setInterval(() => {
+  electron.autoUpdater.checkForUpdates();
+}, 3600);
+electron.autoUpdater.checkForUpdates();
+electron.autoUpdater.on("checking-for-update", () => {
+  console.log("Checking for updates");
+});
 process.env.DIST_ELECTRON = node_path.join(__dirname, "..");
 process.env.DIST = node_path.join(process.env.DIST_ELECTRON, "../dist");
 process.env.VITE_PUBLIC = process.env.VITE_DEV_SERVER_URL ? node_path.join(process.env.DIST_ELECTRON, "../public") : process.env.DIST;

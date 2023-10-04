@@ -1,6 +1,18 @@
-import { app, BrowserWindow, shell, ipcMain } from 'electron'
+import { app, BrowserWindow, shell, ipcMain, autoUpdater } from 'electron'
 import { release } from 'node:os'
 import { join } from 'node:path'
+
+require('update-electron-app')()
+
+setInterval(() => {
+  autoUpdater.checkForUpdates()
+}, 3600)
+
+autoUpdater.checkForUpdates()
+
+autoUpdater.on('checking-for-update',()=>{
+  console.log("Checking for updates")
+})
 
 // The built directory structure
 //

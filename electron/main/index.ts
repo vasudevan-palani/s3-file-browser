@@ -87,6 +87,8 @@ async function createWindow() {
 
 app.whenReady().then(()=>{
   createWindow()
+  let position1 = win.getPosition()
+  console.log(position1)
   ipcMain.on('dblclick-navbar', () => {
     if(win.isMaximized())
     {
@@ -95,6 +97,14 @@ app.whenReady().then(()=>{
     else{
       win.maximize();
     }
+    
+  });
+  ipcMain.on('move-window', (event,x,y) => {
+    let position = win.getPosition()
+    console.log(position)
+    let x1 = position[0] + x
+    let y1 = position[1] + y
+    win.setPosition(x1, y1)
     
   });
 })

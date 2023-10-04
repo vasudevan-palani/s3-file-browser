@@ -97,3 +97,36 @@ code {
     background-color: #f9f9f9;
   }
 }
+
+
+#titlebar #drag-region {
+  width: 100%;
+  height: 100%;
+  -webkit-app-region: drag;
+}
+
+#titlebar {
+  color: #FFF;
+  display: block;
+}
+
+
+#window-title {
+  text-align: center;
+  align-items: center;
+  font-family: "Segoe UI", sans-serif;
+  font-size: 15px;
+  background-color: #409eff;
+  height: 50px;
+}
+
+#window-title span {
+  padding: 10px;
+  margin-top: 50px;
+  position: relative;
+  top:12px;
+}
+
+body{
+  display: block;
+}

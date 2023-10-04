@@ -4,6 +4,7 @@ import { SettingsIcon, FileIcon } from '@vue-icons/feather';
 import { useRouter, useRoute } from 'vue-router';
 const { ipcRenderer } = require('electron');
 
+
 export default defineComponent({
     props : {
     },
@@ -33,11 +34,60 @@ export default defineComponent({
           ipcRenderer.send('dblclick-navbar');
         }
 
+        let isDragging:boolean = false
+        let offsetX:any = undefined
+        let offsetY:any = undefined
+        
+        const startDrag = (e:any) => {
+          isDragging = true;
+          const rect = e.target.getBoundingClientRect();
+          offsetX = e.clientX - rect.left;
+          offsetY = e.clientY - rect.top;
+        }
+
+        const drag = (e:any) => {
+          if (isDragging) {
+            const x = e.clientX - offsetX;
+            const y = e.clientY - offsetY;
+            ipcRenderer.send('move-window',x,y)
+          }
+        }
+
+        const endDrag = (e:any) => {
+          isDragging = false
+        }
+
+
+
+        // let offset:any = []
+
+        // const onMouseDown = (e:any)=>{
+        //   console.log(e.clientX,e.clientY)
+        //   offset = [e.clientX, e.clientY]
+        // }
+
+        // const dragstart = (e)=>{
+        //   console.log(e)
+        //   let x = e.clientX
+        //   let y = e.clientY
+        //   let x1 = Math.round(x - offset[0])
+        //   let y1 = Math.round(y - offset[1])
+        //   console.log(x1,y1)
+        //   //if (x1 > 0){
+        //   ipcRenderer.send('move-window',x1,y1)
+        //   //}
+          
+        // }
+        
+
         return {
             showMessage : showMessage,
             showErrorMessage : showErrorMessage,
             error_message : error_message,
             message : message,
+            startDrag:startDrag,
+            drag : drag,
+            endDrag : endDrag,
             dblclickNavBar: dblclickNavBar,
             gotoFolder : gotoFolder,
             gotoAwsSettings : gotoAwsSettings,
@@ -50,11 +100,11 @@ export default defineComponent({
 </script>
 
 <template>
-  <el-row v-on:dblclick="dblclickNavBar" class="nav-bar">
+  <!-- <el-row  v-on:dblclick="dblclickNavBar" class="nav-bar">
     <el-col :span="24">
       <p  class="title"> S3 File Browser</p>
     </el-col>
-  </el-row>
+  </el-row> -->
   <el-row class="body-container">
     <el-col :span="1">
         <el-button class="left-menu-buttons" type="primary" @click="gotoAwsSettings" :icon="SettingsIcon" circle />
@@ -72,27 +122,12 @@ export default defineComponent({
 </template>
 
 <style>
-.nav-buttons{
-  vertical-align: middle;
-}
-.title{
-  color: white;
-  cursor: default;
-  
-}
-.menu-button-label{
-  align-items: center;
+
+.menu-button-label {
   margin-bottom: 20px;
 }
 .body-container{
   padding: 1rem;
-}
-.nav-bar{
-  background-color: #409eff;
-  height: 50px;
-  -webkit-app-region : "drag";
-  user-select: none;
-  -webkit-user-select: none;
 }
 .flex-center {
   display: flex;
@@ -116,7 +151,6 @@ export default defineComponent({
   padding:20px!important;
   height: 65px;
   font-size: 1.5em;
-  
 }
 
 .logo:hover {

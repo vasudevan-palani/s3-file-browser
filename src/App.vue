@@ -1,6 +1,6 @@
 <script lang="ts">
 import { ref, defineComponent } from 'vue';
-import { SettingsIcon, FileIcon } from '@vue-icons/feather';
+import { SettingsIcon, FileIcon, MinusIcon, PlusIcon,XIcon } from '@vue-icons/feather';
 import { useRouter, useRoute } from 'vue-router';
 const { ipcRenderer } = require('electron');
 
@@ -34,50 +34,10 @@ export default defineComponent({
           ipcRenderer.send('dblclick-navbar');
         }
 
-        let isDragging:boolean = false
-        let offsetX:any = undefined
-        let offsetY:any = undefined
-        
-        const startDrag = (e:any) => {
-          isDragging = true;
-          const rect = e.target.getBoundingClientRect();
-          offsetX = e.clientX - rect.left;
-          offsetY = e.clientY - rect.top;
+        const isWindows = () => {
+          console.log(process.platform)
+          return process.platform == "win32"
         }
-
-        const drag = (e:any) => {
-          if (isDragging) {
-            const x = e.clientX - offsetX;
-            const y = e.clientY - offsetY;
-            ipcRenderer.send('move-window',x,y)
-          }
-        }
-
-        const endDrag = (e:any) => {
-          isDragging = false
-        }
-
-
-
-        // let offset:any = []
-
-        // const onMouseDown = (e:any)=>{
-        //   console.log(e.clientX,e.clientY)
-        //   offset = [e.clientX, e.clientY]
-        // }
-
-        // const dragstart = (e)=>{
-        //   console.log(e)
-        //   let x = e.clientX
-        //   let y = e.clientY
-        //   let x1 = Math.round(x - offset[0])
-        //   let y1 = Math.round(y - offset[1])
-        //   console.log(x1,y1)
-        //   //if (x1 > 0){
-        //   ipcRenderer.send('move-window',x1,y1)
-        //   //}
-          
-        // }
         
 
         return {
@@ -85,14 +45,15 @@ export default defineComponent({
             showErrorMessage : showErrorMessage,
             error_message : error_message,
             message : message,
-            startDrag:startDrag,
-            drag : drag,
-            endDrag : endDrag,
             dblclickNavBar: dblclickNavBar,
             gotoFolder : gotoFolder,
             gotoAwsSettings : gotoAwsSettings,
             SettingsIcon: SettingsIcon,
-            FileIcon : FileIcon
+            FileIcon : FileIcon,
+            MinusIcon : MinusIcon,
+            PlusIcon : PlusIcon,
+            XIcon : XIcon,
+            isWindows:isWindows
         }
     }
 })
@@ -105,6 +66,19 @@ export default defineComponent({
       <p  class="title"> S3 File Browser</p>
     </el-col>
   </el-row> -->
+  <header id="titlebar">
+      <div id="drag-region">
+
+        <div id="window-title">
+          <span>S3 File Browser</span>
+        </div>
+        <div v-if="isWindows()" class="window-button-container">
+            <el-button class="window-buttons" :icon="MinusIcon"/>
+            <el-button class="window-buttons" :icon="PlusIcon"/>
+            <el-button class="window-buttons" :icon="XIcon"/>
+        </div>
+      </div>
+    </header>
   <el-row class="body-container">
     <el-col :span="1">
         <el-button class="left-menu-buttons" type="primary" @click="gotoAwsSettings" :icon="SettingsIcon" circle />
@@ -122,7 +96,11 @@ export default defineComponent({
 </template>
 
 <style>
-
+.window-button-container{
+  position:fixed;
+  right:0px;
+  top:0px;
+}
 .menu-button-label {
   margin-bottom: 20px;
 }
@@ -159,5 +137,11 @@ export default defineComponent({
 
 .logo.vue:hover {
   filter: drop-shadow(0 0 2em #42b883aa);
+}
+
+.window-buttons{
+  margin-left:0px!important;
+  background-color: #409eff;
+  color: white;
 }
 </style>

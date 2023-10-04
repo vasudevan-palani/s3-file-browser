@@ -99,13 +99,12 @@ app.whenReady().then(()=>{
     }
     
   });
-  ipcMain.on('move-window', (event,x,y) => {
-    let position = win.getPosition()
-    console.log(position)
-    let x1 = position[0] + x
-    let y1 = position[1] + y
-    win.setPosition(x1, y1)
-    
+  ipcMain.on('closeApp', (event,x,y) => {
+    win.close()
+  });
+
+  ipcMain.on('minimizeApp', (event,x,y) => {
+    win.minimize()
   });
 })
 

@@ -31,12 +31,22 @@ export default defineComponent({
         }
 
         const  dblclickNavBar = () => {
+          console.log("dblclickNavBar")
           ipcRenderer.send('dblclick-navbar');
         }
 
         const isWindows = () => {
           console.log(process.platform)
           return process.platform == "win32"
+        }
+
+        const minimizeApp = ()=>{
+          console.log("minimizeApp")
+          ipcRenderer.send('minimizeApp');
+        }
+
+        const closeApp = () => {
+          ipcRenderer.send('closeApp');
         }
         
 
@@ -53,7 +63,9 @@ export default defineComponent({
             MinusIcon : MinusIcon,
             PlusIcon : PlusIcon,
             XIcon : XIcon,
-            isWindows:isWindows
+            isWindows:isWindows,
+            minimizeApp : minimizeApp,
+            closeApp : closeApp
         }
     }
 })
@@ -66,19 +78,20 @@ export default defineComponent({
       <p  class="title"> S3 File Browser</p>
     </el-col>
   </el-row> -->
-  <header id="titlebar">
+  <div id="titlebar">
       <div id="drag-region">
 
         <div id="window-title">
           <span>S3 File Browser</span>
         </div>
-        <div v-if="isWindows()" class="window-button-container">
-            <el-button class="window-buttons" :icon="MinusIcon"/>
-            <el-button class="window-buttons" :icon="PlusIcon"/>
-            <el-button class="window-buttons" :icon="XIcon"/>
-        </div>
       </div>
-    </header>
+      <div v-if="isWindows()" class="window-button-container">
+            <el-button @click="minimizeApp" class="window-buttons" :icon="MinusIcon"/>
+            <el-button @click="dblclickNavBar" class="window-buttons" :icon="PlusIcon"/>
+            <el-button @click="closeApp" class="window-buttons" :icon="XIcon"/>
+      </div>     
+    </div>
+
   <el-row class="body-container">
     <el-col :span="1">
         <el-button class="left-menu-buttons" type="primary" @click="gotoAwsSettings" :icon="SettingsIcon" circle />
@@ -97,9 +110,11 @@ export default defineComponent({
 
 <style>
 .window-button-container{
-  position:fixed;
+  position:absolute;
+  -webkit-app-region: no-drag;
   right:0px;
   top:0px;
+  z-index: 100;
 }
 .menu-button-label {
   margin-bottom: 20px;
@@ -143,5 +158,8 @@ export default defineComponent({
   margin-left:0px!important;
   background-color: #409eff;
   color: white;
+  z-index: -10;
+  border: none;
+  padding: 8px;
 }
 </style>

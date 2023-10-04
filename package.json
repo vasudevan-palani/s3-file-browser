@@ -14,6 +14,12 @@
     "vue"
   ],
   "repository": "https://github.com/vasudevan-palani/s3-file-browser",
+  "electron-updater": {
+    "repo": "vasudevan-palani/s3-file-browser",
+    "provider": "github",
+    "autoDownload": true,
+    "autoInstall": true
+  },
   "debug": {
     "env": {
       "VITE_DEV_SERVER_URL": "http://127.0.0.1:3344/"

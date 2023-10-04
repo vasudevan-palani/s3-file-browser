@@ -3,10 +3,6 @@ const electron = require("electron");
 const node_os = require("node:os");
 const node_path = require("node:path");
 require("update-electron-app")();
-setInterval(() => {
-  electron.autoUpdater.checkForUpdates();
-}, 3600);
-electron.autoUpdater.checkForUpdates();
 electron.autoUpdater.on("checking-for-update", () => {
   console.log("Checking for updates");
 });

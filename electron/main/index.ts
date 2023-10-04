@@ -4,12 +4,6 @@ import { join } from 'node:path'
 
 require('update-electron-app')()
 
-setInterval(() => {
-  autoUpdater.checkForUpdates()
-}, 3600)
-
-autoUpdater.checkForUpdates()
-
 autoUpdater.on('checking-for-update',()=>{
   console.log("Checking for updates")
 })

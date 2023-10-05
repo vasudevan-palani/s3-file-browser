@@ -23,6 +23,8 @@ const message = ref("");
 const isSaveDisabled = ref(true);
 const errorMessage = ref("");
 const filetype = ref("unknown");
+const customFiletype = ref("unknown");
+const customFileTypeChoice = ref("")
 
 const objectUrl = ref<string>("")
 
@@ -114,19 +116,31 @@ const onChange = (content: any) => {
   updatedContent = content;
 };
 
+const customFileTypeSelected = ()=>{
+  console.log(customFileTypeChoice.value)
+  if (customFileTypeChoice.value == "text"){
+    customFiletype.value = "txt"
+  }
+  else if (customFileTypeChoice.value == "json"){
+    customFiletype.value = "json"
+  }
+}
+
 // watchers
 //
 watchEffect(() => {
   objectUrl.value = ""
+  customFileTypeChoice.value = ""
+  customFiletype.value = ""
   if (props.s3bucket == undefined || props.s3url == undefined) {
     return;
   }
 
   filetype.value = getFileType(props.s3url);
 
-  if (filetype.value == "unknown") {
-    return;
-  }
+  // if (filetype.value == "unknown") {
+  //   return;
+  // }
 
   objectUrl.value = `s3://${props.s3bucket}/${props.s3url}`
 
@@ -162,6 +176,19 @@ watchEffect(() => {
         >
       </el-col>
     </el-row>
+    <el-row  v-if="filetype == 'unknown' && objectUrl != ''"> 
+      <el-col :span="6" class="file-name">
+        <el-text
+          >Please select an editor</el-text
+        >
+      </el-col>
+      <el-col :span="6">
+        <el-radio-group v-model="customFileTypeChoice" class="ml-4" @change="customFileTypeSelected">
+          <el-radio label="text" size="large">Text Editor</el-radio>
+          <el-radio label="json" size="large">Json Editor</el-radio>
+        </el-radio-group>
+      </el-col>
+    </el-row>
   </div>
   <div>
     <el-text type="danger">{{ errorMessage }}</el-text>
@@ -169,7 +196,7 @@ watchEffect(() => {
   </div>
   <div class="s3editor" v-if="objectUrl != ''">
     <v-ace-editor
-      v-if="filetype != 'unknown' && filetype != 'json'"
+      v-if="(filetype != 'unknown' && filetype != 'json') || (customFiletype == 'txt')"
       v-model:value="json"
       @update:value="onChange"
       lang="filetype"
@@ -177,7 +204,7 @@ watchEffect(() => {
       style="height: 720px"
     />
     <vue-jsoneditor
-      v-else-if="filetype == 'json'"
+      v-else-if="filetype == 'json' || (customFiletype == 'json')"
       height="725"
       mode="text"
       v-model:text="json"

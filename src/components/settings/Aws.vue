@@ -5,11 +5,13 @@ import { useRouter, useRoute } from "vue-router";
 const fs = require("fs");
 const os = require("os");
 import Credentials from "../../services/aws";
+import { session } from "electron";
 const ini = require('multi-ini');
 
 interface AWSProfileData{
   aws_access_key_id:string
   aws_secret_access_key: string
+  session_token: string
   default_region: string
 }
 
@@ -25,8 +27,10 @@ const route = useRoute();
 const aws_profile = ref<string>("");
 const aws_access_key_id = ref<string>("");
 const aws_secret_access_key = ref<string>("");
+const session_token = ref<string>("");
 const default_region = ref<string>("us-east-1");
 const selected_profile = ref<AWSProfileData>();
+
 const aws_profiles = ref<AwsProfile[]>([]);
 const activeName = ref("profile");
 
@@ -37,6 +41,7 @@ const saveAwsSettings = () => {
     JSON.stringify({
       aws_access_key_id: aws_access_key_id.value,
       aws_secret_access_key: aws_secret_access_key.value,
+      session_token: session_token.value,
       default_region: default_region.value,
     }),
     function (err: any) {
@@ -49,6 +54,8 @@ const saveAwsSettings = () => {
 
   Credentials.setAccessKey(aws_access_key_id.value);
   Credentials.setSecretKey(aws_secret_access_key.value);
+  Credentials.setSessionToken(session_token.value);
+  Credentials.setDefaultRegion(default_region.value);
   process.env.AWS_PROFILE = aws_profile.value;
   process.env.aws_access_key_id = aws_access_key_id.value;
   process.env.aws_secret_access_key = aws_secret_access_key.value;
@@ -73,6 +80,7 @@ onBeforeMount(() => {
             "value":{
               "aws_access_key_id":content[profileName].aws_access_key_id,
               "aws_secret_access_key":content[profileName].aws_secret_access_key,
+              "session_token":content[profileName].aws_session_token,
               "default_region":content[profileName].aws_default_region  
             },
             "label":profileName,
@@ -101,6 +109,9 @@ onBeforeMount(() => {
   if (Credentials.getSecretKey() != undefined) {
     aws_secret_access_key.value = Credentials.getSecretKey();
   }
+  if (Credentials.getSecretKey() != undefined) {
+    aws_secret_access_key.value = Credentials.getSecretKey();
+  }
 });
 
 const handleTabClick = () => {
@@ -111,6 +122,7 @@ const saveAwsProfileSettings = () => {
   console.log(selected_profile.value)
   aws_access_key_id.value = selected_profile.value?.aws_access_key_id != undefined ? String(selected_profile.value?.aws_access_key_id) : ""
   aws_secret_access_key.value = selected_profile.value?.aws_secret_access_key != undefined ? String(selected_profile.value?.aws_secret_access_key) : ""
+  session_token.value = selected_profile.value?.session_token != undefined ? String(selected_profile.value?.session_token) : ""
   default_region.value = selected_profile.value?.default_region == undefined ? "us-east-1" : selected_profile.value?.default_region
 
   saveAwsSettings()
@@ -174,6 +186,17 @@ const count = ref(0);
           v-model="aws_secret_access_key"
           class="w-50 m-2"
           placeholder="Secret Access Key"
+          :suffix-icon="UserIcon"
+        />
+      </el-row>
+      <el-row class="form-row">
+        <span class="ml-3 w-35 text-gray-600 inline-flex items-center"
+          >Enter the Session Token</span
+        >
+        <el-input
+          v-model="session_token"
+          class="w-50 m-2"
+          placeholder="Session Token"
           :suffix-icon="UserIcon"
         />
       </el-row>

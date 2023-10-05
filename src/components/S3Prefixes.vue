@@ -1,8 +1,7 @@
 <script setup lang="ts">
 import { reactive, ref, watchEffect, onMounted, watch, onUpdated } from "vue";
 import ListItems from "./ListItems.vue";
-import Credentials from "../services/aws";
-
+import S3Client from "../services/s3client";
 // AWS Initialization
 //
 const AWS = require("aws-sdk");
@@ -25,9 +24,9 @@ const props = defineProps({
 
 const items = ref<any[]>([]);
 
-const hasMore = ref<boolean>(false)
+const hasMore = ref<boolean>(false);
 
-const nextToken = ref<string>("")
+const nextToken = ref<string>("");
 
 // handlers
 //
@@ -36,96 +35,58 @@ const itemSelected = (item: any) => {
 };
 
 const onClickedMore = () => {
-  console.log("S3Prefixes::onClickedMore")
-  getS3Items(props.s3bucket,props.s3prefix,nextToken.value)
-}
-
+  console.log("S3Prefixes::onClickedMore");
+  getS3Items(props.s3bucket, props.s3prefix, nextToken.value);
+};
 
 // resuable functions
 //
 
-const getS3Items = (s3bucket:string|undefined,s3prefix:string|undefined,continuationToken:string) => {
-
-  AWS.config.update({
-    accessKeyId: Credentials.getAccessKey(),
-    secretAccessKey: Credentials.getSecretKey()
-  });
-  const s3 = new AWS.S3();
-
-
-  let params:any = {
-    "Bucket" : s3bucket
-  }
-  if (s3prefix != undefined && s3prefix != ""){
-    params["Prefix"] = s3prefix
-  }
-
-  if (continuationToken != ""){
-    params["ContinuationToken"] = continuationToken
-  }
-  console.log(params)
-  s3.listObjectsV2(params, (err:any, data:any) => {
-    if (err) {
-      console.log(err);
-      return;
-    }
-    console.log(data);
-
-    let childItems = [];
-    if (data.NextContinuationToken != undefined && data.NextContinuationToken != null){
-      hasMore.value = true
-      nextToken.value = data.NextContinuationToken
-    }
-    else {
-      hasMore.value = false
-      nextToken.value = ""
-    }
-    for (let i = 0; i < data.Contents.length; i++) {
-      let filekey = data.Contents[i].Key;
-      console.log(filekey);
-      if (props.s3prefix != undefined) {
-        filekey = filekey.replace(props.s3prefix + "/", "");
-        console.log(filekey);
-      }
-      if (filekey.includes("/")) {
-        console.log(filekey.split("/")[0]);
-        let keyItem = filekey.split("/")[0];
-        if (keyItem != undefined && keyItem != "") {
-          childItems.push({ Name: keyItem, isLeaf: false });
-        }
+const getS3Items = (
+  s3bucket: string | undefined,
+  s3prefix: string | undefined,
+  continuationToken: string
+) => {
+  new S3Client()
+    .getItems(String(s3bucket), String(s3prefix), continuationToken)
+    .then((result: any) => {
+      console.log(result)
+      if (result.nextToken != undefined && result.nextToken != null) {
+        hasMore.value = true;
+        nextToken.value = result.nextToken;
       } else {
-        if(filekey != undefined && filekey != null && filekey != ""){
-          childItems.push({ Name: filekey, isLeaf: true });
-        }
-        
+        hasMore.value = false;
+        nextToken.value = "";
       }
-    }
-    const uniqueArray = childItems.filter(
-      (obj, index, self) => self.findIndex((o) => o.Name === obj.Name) === index
-    );
-    console.log(uniqueArray)
-    if(continuationToken == ""){
-      items.value = []
-    }
-    items.value = items.value.concat(uniqueArray)
-    
-  });
+
+      if (result.nextToken == "") {
+        items.value = [];
+      }
+      items.value = items.value.concat(result.items);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 };
 
 //lifecycles and watches
 //
 onMounted(() => {
-  getS3Items(props.s3bucket,props.s3prefix,"")
+  getS3Items(props.s3bucket, props.s3prefix, "");
 });
 
 watchEffect(() => {
-  getS3Items(props.s3bucket,props.s3prefix,"")
+  getS3Items(props.s3bucket, props.s3prefix, "");
 });
-
 </script>
 
 <template>
-  <ListItems :has-more="hasMore" @clicked-more="onClickedMore" :items="items" @item-selected="itemSelected" />
+  <ListItems
+    :has-more="hasMore"
+    @clicked-more="onClickedMore"
+    :items="items"
+    @item-selected="itemSelected"
+  />
 </template>
 
 <style scoped>

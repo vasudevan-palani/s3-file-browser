@@ -38,6 +38,9 @@ const bucketClicked = (bucketName:string) => {
 const bucketSelected = (bucketName:string) => {
   console.log(bucketName)
   s3bucket.value = bucketName
+  prefixes.value = []
+  s3prefix.value = undefined
+  selectedFile.value = undefined
 }
 
 const keySelected = (keyName: string,isLeaf:boolean) => {

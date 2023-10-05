@@ -39,6 +39,7 @@ const saveAwsSettings = () => {
   fs.writeFile(
     os.homedir() + "/.s3browser",
     JSON.stringify({
+      selected_profile: selected_profile.value,
       aws_access_key_id: aws_access_key_id.value,
       aws_secret_access_key: aws_secret_access_key.value,
       session_token: session_token.value,
@@ -94,9 +95,17 @@ onBeforeMount(() => {
     if (err) {
       console.error("Error reading the file:", err);
     } else {
+      
       let creds = JSON.parse(data);
+
+      if (creds.selected_profile != undefined){
+        selected_profile.value = creds.selected_profile
+      }
+
       Credentials.setAccessKey(creds.aws_access_key_id);
       Credentials.setSecretKey(creds.aws_secret_access_key);
+      Credentials.setSessionToken(creds.session_token);
+      Credentials.setDefaultRegion(creds.default_region);
       if (route.path == "/") {
         router.push("/home");
       }
@@ -109,8 +118,8 @@ onBeforeMount(() => {
   if (Credentials.getSecretKey() != undefined) {
     aws_secret_access_key.value = Credentials.getSecretKey();
   }
-  if (Credentials.getSecretKey() != undefined) {
-    aws_secret_access_key.value = Credentials.getSecretKey();
+  if (Credentials.getSessionToken() != undefined) {
+    session_token.value = Credentials.getSessionToken();
   }
 });
 

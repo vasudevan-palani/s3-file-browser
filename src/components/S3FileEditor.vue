@@ -24,6 +24,8 @@ const isSaveDisabled = ref(true);
 const errorMessage = ref("");
 const filetype = ref("unknown");
 
+const objectUrl = ref<string>("")
+
 // Properties
 //
 const props = defineProps({
@@ -115,6 +117,7 @@ const onChange = (content: any) => {
 // watchers
 //
 watchEffect(() => {
+  objectUrl.value = ""
   if (props.s3bucket == undefined || props.s3url == undefined) {
     return;
   }
@@ -124,6 +127,8 @@ watchEffect(() => {
   if (filetype.value == "unknown") {
     return;
   }
+
+  objectUrl.value = `s3://${props.s3bucket}/${props.s3url}`
 
   new S3Client()
     .getObject(props.s3bucket, props.s3url)
@@ -142,8 +147,10 @@ watchEffect(() => {
   <div class="file-editor">
     <el-row>
       <el-col :span="20" class="file-name">
-        <el-text v-if="s3url == undefined || s3bucket == undefined" >Please select a file</el-text>
-        <el-text v-else>s3://{{ s3bucket }}/{{ s3url }}</el-text>
+        <el-text v-if="objectUrl == ''"
+          >Please select a file</el-text
+        >
+        <el-text v-else>{{objectUrl}}</el-text>
       </el-col>
       <el-col :span="4" class="file-actions">
         <el-button
@@ -160,7 +167,7 @@ watchEffect(() => {
     <el-text type="danger">{{ errorMessage }}</el-text>
     <el-text type="success">{{ message }}</el-text>
   </div>
-  <div class="s3editor" v-if="s3url != undefined && s3bucket != undefined">
+  <div class="s3editor" v-if="objectUrl != ''">
     <v-ace-editor
       v-if="filetype != 'unknown' && filetype != 'json'"
       v-model:value="json"

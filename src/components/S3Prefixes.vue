@@ -2,6 +2,7 @@
 import { reactive, ref, watchEffect, onMounted, watch, onUpdated } from "vue";
 import ListItems from "./ListItems.vue";
 import S3Client from "../services/s3client";
+import { SearchIcon } from "@vue-icons/feather";
 // AWS Initialization
 //
 const AWS = require("aws-sdk");
@@ -22,6 +23,9 @@ const props = defineProps({
 //Variables
 //
 
+const error = ref<string>("");
+const filter = ref<string>("");
+
 const items = ref<any[]>([]);
 
 const hasMore = ref<boolean>(false);
@@ -31,6 +35,7 @@ const nextToken = ref<string>("");
 // handlers
 //
 const itemSelected = (item: any) => {
+  filter.value = ""
   emit("keySelected", item.Name, item.isLeaf);
 };
 
@@ -92,11 +97,24 @@ watchEffect(() => {
 </script>
 
 <template>
+  <el-row>
+    <el-text v-if="error != ''" type="danger">{{ error }}</el-text>
+  </el-row>
+  <el-row class="searchfilter">
+    <el-input
+      v-model="filter"
+      class="w-50 m-2"
+      size="large"
+      placeholder="Search"
+      :suffix-icon="SearchIcon"
+    />
+  </el-row>
   <ListItems
     :has-more="hasMore"
     @clicked-more="onClickedMore"
     :items="items"
     @item-selected="itemSelected"
+    :filter="filter"
   />
 </template>
 
@@ -105,6 +123,10 @@ watchEffect(() => {
   border: #999 1px solid;
   border-radius: 5px;
   padding: 10px;
+  margin: 10px;
+  text-align: left;
+}
+.searchfilter{
   margin: 10px;
 }
 </style>

@@ -34,7 +34,8 @@ async function createWindow() {
       // Consider using contextBridge.exposeInMainWorld
       // Read more on https://www.electronjs.org/docs/latest/tutorial/context-isolation
       nodeIntegration: true,
-      contextIsolation: false
+      contextIsolation: false,
+      devTools: false
     }
   });
   win.setMinimumSize(1280, 720);

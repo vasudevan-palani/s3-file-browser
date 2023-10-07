@@ -41,17 +41,27 @@ const onClickedMore = () => {
 
 // resuable functions
 //
+const removeDuplicates = (childItems:any) => {
+  let uniqueArray = childItems.filter(
+          (obj:any, index:any, self:any) =>
+            self.findIndex((o:any) => o.Name === obj.Name) === index
+        );
+  return uniqueArray
+}
 
 const getS3Items = (
   s3bucket: string | undefined,
   s3prefix: string | undefined,
   continuationToken: string
 ) => {
+  if (continuationToken == ""){
+    items.value = []
+  }
   new S3Client()
     .getItems(String(s3bucket), String(s3prefix), continuationToken)
     .then((result: any) => {
       console.log(result)
-      if (result.nextToken != undefined && result.nextToken != null) {
+      if (result.nextToken != undefined && result.nextToken != null && result.nextToken != '') {
         hasMore.value = true;
         nextToken.value = result.nextToken;
       } else {
@@ -63,6 +73,7 @@ const getS3Items = (
         items.value = [];
       }
       items.value = items.value.concat(result.items);
+      items.value = removeDuplicates(items.value)
     })
     .catch((err) => {
       console.log(err);
@@ -72,7 +83,7 @@ const getS3Items = (
 //lifecycles and watches
 //
 onMounted(() => {
-  getS3Items(props.s3bucket, props.s3prefix, "");
+  //getS3Items(props.s3bucket, props.s3prefix, "");
 });
 
 watchEffect(() => {

@@ -25,6 +25,8 @@ const errorMessage = ref("");
 const filetype = ref("unknown");
 const customFiletype = ref("unknown");
 const customFileTypeChoice = ref("")
+const expires = ref("")
+const invalidFile = ref(false)
 
 const objectUrl = ref<string>("")
 
@@ -37,6 +39,12 @@ const props = defineProps({
   s3bucket: {
     type: String,
   },
+  size : {
+    type: Number
+  },
+  lastmodified : {
+    type: String
+  }
 });
 
 let updatedContent: any = undefined;
@@ -126,12 +134,30 @@ const customFileTypeSelected = ()=>{
   }
 }
 
+const formatSize = (sizeInBytes:number)=>{
+  
+  let sizeFormatString = ""
+  if (sizeInBytes >= 0 && sizeInBytes < 1024){
+    sizeFormatString = `${sizeInBytes} bytes`
+  }
+  if (sizeInBytes >= 1024 && sizeInBytes < 1024 * 1024){
+    sizeFormatString = `${(sizeInBytes/1024).toFixed(2)} KB`
+  }
+  if (sizeInBytes >= 1024*1024 && sizeInBytes < 1024 * 1024 * 1024){
+    sizeFormatString = `${(sizeInBytes/(1024*1024)).toFixed(2)} MB`
+  }
+
+  return sizeFormatString
+}
+
 // watchers
 //
 watchEffect(() => {
   objectUrl.value = ""
+  json.value= ""
   customFileTypeChoice.value = ""
   customFiletype.value = ""
+  invalidFile.value = false
   if (props.s3bucket == undefined || props.s3url == undefined) {
     return;
   }
@@ -143,12 +169,20 @@ watchEffect(() => {
   // }
 
   objectUrl.value = `s3://${props.s3bucket}/${props.s3url}`
+  let filesize = props.size?props.size:0
+  if((filesize) > (1024*1024*1024)){
+    invalidFile.value = true
+    errorMessage.value = `File size too big. ${formatSize(filesize)}`
+    return
+  }
 
   new S3Client()
     .getObject(props.s3bucket, props.s3url)
-    .then((contents: any) => {
+    .then((result: any) => {
+      let contents = result.content;
       json.value = String(contents);
       isSaveDisabled.value = false;
+      errorMessage.value = ""
     })
     .catch((err) => {
       console.error("Error getting JSON object from S3:", err);
@@ -176,7 +210,7 @@ watchEffect(() => {
         >
       </el-col>
     </el-row>
-    <el-row  v-if="filetype == 'unknown' && objectUrl != ''"> 
+    <el-row  v-if="filetype == 'unknown' && objectUrl != '' && invalidFile == false"> 
       <el-col :span="6" class="file-name">
         <el-text
           >Please select an editor</el-text
@@ -194,7 +228,17 @@ watchEffect(() => {
     <el-text type="danger">{{ errorMessage }}</el-text>
     <el-text type="success">{{ message }}</el-text>
   </div>
-  <div class="s3editor" v-if="objectUrl != ''">
+  <div v-if="objectUrl != '' && invalidFile == false">
+    <el-row class="file-metadata">
+      <el-col :span="12">
+        <span> Last Modified : {{ lastmodified }}</span>
+      </el-col>
+      <el-col :span="12">
+        <span> Size : {{ formatSize(size?size:0) }}</span>
+      </el-col>
+    </el-row>
+  </div>
+  <div class="s3editor" v-if="objectUrl != '' && invalidFile == false">
     <v-ace-editor
       v-if="(filetype != 'unknown' && filetype != 'json') || (customFiletype == 'txt')"
       v-model:value="json"
@@ -224,6 +268,11 @@ watchEffect(() => {
 .s3editor {
   text-align: left;
   padding: 10px;
+}
+
+.file-metadata{
+  text-align: left;
+  padding-left: 10px;
 }
 
 .file-name {

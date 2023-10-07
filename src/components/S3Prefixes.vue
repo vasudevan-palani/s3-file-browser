@@ -36,7 +36,7 @@ const nextToken = ref<string>("");
 //
 const itemSelected = (item: any) => {
   filter.value = ""
-  emit("keySelected", item.Name, item.isLeaf);
+  emit("keySelected", item.Name, item.isLeaf, item.modified, item.size);
 };
 
 const onClickedMore = () => {

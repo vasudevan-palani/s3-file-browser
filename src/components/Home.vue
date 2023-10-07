@@ -11,6 +11,8 @@ const s3bucket = ref<string|undefined>(undefined)
 const prefixes = ref<string[]>([])
 const s3prefix = ref<string|undefined>(undefined)
 const selectedFile = ref<string|undefined>(undefined)
+const selectedFileLastModified = ref("")
+const selectedFileSize = ref(0)
 
 const prefixClicked = (prefixIndex:number,prefix:string) => {
   console.log(prefixIndex)
@@ -43,7 +45,7 @@ const bucketSelected = (bucketName:string) => {
   selectedFile.value = undefined
 }
 
-const keySelected = (keyName: string,isLeaf:boolean) => {
+const keySelected = (keyName: string,isLeaf:boolean,lastModified:string="",size:number=0) => {
   if (keyName != undefined && isLeaf == false){
     prefixes.value.push(keyName)
     s3prefix.value = prefixes.value.join("/")
@@ -51,12 +53,17 @@ const keySelected = (keyName: string,isLeaf:boolean) => {
   }
   else {
     console.log(s3prefix.value)
+    selectedFileSize.value = size
+    selectedFileLastModified.value = lastModified
     if (s3prefix.value != undefined && s3prefix.value != null && s3prefix.value != ""){
       selectedFile.value = `${s3prefix.value}/${keyName}`
     }
     else{
       selectedFile.value = `${keyName}`
     }
+
+    
+
     console.log(keyName)
     console.log(selectedFile.value)
     
@@ -80,7 +87,7 @@ const keySelected = (keyName: string,isLeaf:boolean) => {
         </div>
       </el-col>
       <el-col :span="19">
-        <S3FileEditor :s3bucket="s3bucket" :s3url="selectedFile"/>
+        <S3FileEditor :size="selectedFileSize" :lastmodified="selectedFileLastModified" :s3bucket="s3bucket" :s3url="selectedFile"/>
       </el-col>
     </el-row>
   </div>

@@ -60,7 +60,7 @@ async function createWindow() {
       // Read more on https://www.electronjs.org/docs/latest/tutorial/context-isolation
       nodeIntegration: true,
       contextIsolation: false,
-      devTools: false
+      devTools: true
     },
   })
 

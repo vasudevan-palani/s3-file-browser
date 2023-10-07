@@ -42,9 +42,9 @@ watchEffect(async () => {
 <template>
     <div class="filepath">
         <el-text>File : </el-text>
-        <el-link @click="resetAll()">s3://</el-link>
-        <el-link v-if="s3bucket" @click="bucketClicked(s3bucket)">{{s3bucket}}/</el-link>
-        <span v-if="prefixes" v-for="(prefix,prefixIndex) in prefixes"><el-link @click="prefixClicked(prefixIndex,String(prefix))">{{prefix}}/</el-link></span>
+        <el-link type="primary" @click="resetAll()">s3://</el-link>
+        <el-link type="primary" v-if="s3bucket" @click="bucketClicked(s3bucket)">{{s3bucket}}/</el-link>
+        <span v-if="prefixes" v-for="(prefix,prefixIndex) in prefixes"><el-link type="primary" @click="prefixClicked(prefixIndex,String(prefix))">{{prefix}}/</el-link></span>
     </div>
 </template>
 

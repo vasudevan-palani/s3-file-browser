@@ -62,13 +62,14 @@ class S3Client {
 
     let params: any = {
       Bucket: s3bucket,
+      Delimiter:'/'
     };
     if (
       s3prefix != String(undefined) &&
       s3prefix != "" &&
       s3prefix != undefined
     ) {
-      params["Prefix"] = s3prefix;
+      params["Prefix"] = `${s3prefix}/`;
     }
 
     if (continuationToken != "") {
@@ -98,22 +99,33 @@ class S3Client {
           hasMore = false;
           nextToken = "";
         }
-        for (let i = 0; i < data.Contents.length; i++) {
-          let filekey = data.Contents[i].Key;
-          console.log(filekey);
+        for (let i = 0; i < data.CommonPrefixes.length; i++) {
+          let filekey = data.CommonPrefixes[i].Prefix;
           if (s3prefix != undefined) {
             filekey = filekey.replace(s3prefix + "/", "");
-            console.log(filekey);
+            //console.log(filekey);
+          }
+          let keyItem = filekey.split("/")[0];
+          childItems.push({ Name: keyItem, isLeaf: false });
+          
+        }
+        for (let i = 0; i < data.Contents.length; i++) {
+          let fileItem = data.Contents[i];
+          let filekey = data.Contents[i].Key;
+          //console.log(filekey);
+          if (s3prefix != undefined) {
+            filekey = filekey.replace(s3prefix + "/", "");
+            //console.log(filekey);
           }
           if (filekey.includes("/")) {
-            console.log(filekey.split("/")[0]);
+            //console.log(filekey.split("/")[0]);
             let keyItem = filekey.split("/")[0];
             if (keyItem != undefined && keyItem != "") {
               childItems.push({ Name: keyItem, isLeaf: false });
             }
           } else {
             if (filekey != undefined && filekey != null && filekey != "") {
-              childItems.push({ Name: filekey, isLeaf: true });
+              childItems.push({ Name: filekey, isLeaf: true, modified:fileItem.LastModified, size:fileItem.Size });
             }
           }
         }
@@ -162,7 +174,7 @@ class S3Client {
           // Parse the JSON object
           // const jsonObject = JSON.parse(data.Body.toString());
           let content = data.Body.toString();
-          resolve(content);
+          resolve({content:content,modified:data.LastModified,expires:data.Expiration,size:data.ContentLength});
         }
       );
     });

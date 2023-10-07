@@ -17,8 +17,9 @@ interface AWSProfileData{
 
 interface AwsProfile {
   label : string
-  value : AWSProfileData
+  value : string
 }
+let aws_profile_data : any ;
 
 defineProps<{ msg: string }>();
 const emit = defineEmits(["showMessage"]);
@@ -29,7 +30,7 @@ const aws_access_key_id = ref<string>("");
 const aws_secret_access_key = ref<string>("");
 const session_token = ref<string>("");
 const default_region = ref<string>("us-east-1");
-const selected_profile = ref<AWSProfileData>();
+const selected_profile = ref<string>("");
 
 const aws_profiles = ref<AwsProfile[]>([]);
 const activeName = ref("profile");
@@ -75,15 +76,10 @@ onBeforeMount(() => {
         console.log(err)
       }
       else{
-        let content = ini.read(os.homedir() + "/.aws/credentials")
-        for (const profileName in content){
+        aws_profile_data = ini.read(os.homedir() + "/.aws/credentials")
+        for (const profileName in aws_profile_data){
           aws_profiles.value.push({
-            "value":{
-              "aws_access_key_id":content[profileName].aws_access_key_id,
-              "aws_secret_access_key":content[profileName].aws_secret_access_key,
-              "session_token":content[profileName].aws_session_token,
-              "default_region":content[profileName].aws_default_region  
-            },
+            "value":profileName,
             "label":profileName,
             
           })
@@ -129,10 +125,11 @@ const handleTabClick = () => {
 
 const saveAwsProfileSettings = () => {
   console.log(selected_profile.value)
-  aws_access_key_id.value = selected_profile.value?.aws_access_key_id != undefined ? String(selected_profile.value?.aws_access_key_id) : ""
-  aws_secret_access_key.value = selected_profile.value?.aws_secret_access_key != undefined ? String(selected_profile.value?.aws_secret_access_key) : ""
-  session_token.value = selected_profile.value?.session_token != undefined ? String(selected_profile.value?.session_token) : ""
-  default_region.value = selected_profile.value?.default_region == undefined ? "us-east-1" : selected_profile.value?.default_region
+  let profileContent = aws_profile_data[selected_profile.value]
+  aws_access_key_id.value = profileContent?.aws_access_key_id != undefined ? String(profileContent?.aws_access_key_id) : ""
+  aws_secret_access_key.value = profileContent?.aws_secret_access_key != undefined ? String(profileContent?.aws_secret_access_key) : ""
+  session_token.value = profileContent?.session_token != undefined ? String(profileContent?.session_token) : ""
+  default_region.value = profileContent?.default_region == undefined ? "us-east-1" : profileContent?.default_region
 
   saveAwsSettings()
 }
@@ -163,7 +160,7 @@ const count = ref(0);
         <el-select v-model="selected_profile" class="m-2" placeholder="Select" size="large">
           <el-option
             v-for="item in aws_profiles"
-            :key="item.value"
+            :key="item.label"
             :label="item.label"
             :value="item.value"
           />

@@ -9,6 +9,8 @@ const items = ref<any[]>([]);
 
 const selectedItem = ref({});
 
+const error = ref<string>("")
+
 const selectItem = (item: any) => {};
 
 const AWS = require("aws-sdk");
@@ -23,14 +25,17 @@ onMounted(() => {
     .getBuckets()
     .then((list: any) => {
       items.value = list;
+      error.value = ''
     })
     .catch((err) => {
+      error.value = err
       console.log(err);
     });
 });
 </script>
 
 <template>
+  <el-text v-if="error != ''" type="danger">{{ error }}</el-text>
   <ListItems :has-more="false" :items="items" @item-selected="itemSelected" />
 </template>
 
@@ -42,5 +47,6 @@ onMounted(() => {
   margin: 10px;
   max-height: 770px;
   overflow-y: scroll;
+  text-align: left;
 }
 </style>

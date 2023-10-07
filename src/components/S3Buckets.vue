@@ -20,23 +20,31 @@ const itemSelected = (item: any) => {
   emit("bucketSelected", item.Name);
 };
 
-onMounted(() => {
+const nextToken = ref<string>("")
+
+const getMoreBuckets = (nextToken1:string) => {
   new S3Client()
-    .getBuckets()
-    .then((list: any) => {
-      items.value = list;
+    .getBuckets(nextToken1)
+    .then((result: any) => {
+      console.log(result)
+      nextToken.value = result.nextToken
+      items.value.push(...result.items);
       error.value = ''
     })
     .catch((err) => {
       error.value = err
       console.log(err);
     });
+}
+
+onMounted(() => {
+  getMoreBuckets(nextToken.value)
 });
 </script>
 
 <template>
   <el-text v-if="error != ''" type="danger">{{ error }}</el-text>
-  <ListItems :has-more="false" :items="items" @item-selected="itemSelected" />
+  <ListItems :has-more="nextToken != ''" :items="items" @item-selected="itemSelected" />
 </template>
 
 <style scoped>

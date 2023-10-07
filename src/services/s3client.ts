@@ -1,5 +1,9 @@
 const AWS = require("aws-sdk");
+
 import Credentials from "./aws";
+
+const pageSize:number = 100
+
 class S3Client {
   _s3Client: any;
   constructor() {
@@ -23,10 +27,17 @@ class S3Client {
     this._s3Client = new AWS.S3();
   }
 
-  getBuckets() {
+  getBuckets(nextToken:string) {
     this.init();
     return new Promise((resolve, reject) => {
-      this._s3Client.listBuckets({}, (err: any, data: any) => {
+
+      let params:any = {}
+      
+      if (nextToken != ""){
+        params["ContinuationToken"] = nextToken
+      }
+
+      this._s3Client.listBuckets(params, (err: any, data: any) => {
         if (err) {
           console.log(err);
           reject(err);
@@ -37,7 +48,11 @@ class S3Client {
         for (let i = 0; i < data.Buckets.length; i++) {
           childItems.push({ Name: data.Buckets[i].Name, isLeaf: false });
         }
-        resolve(childItems);
+
+        resolve({
+          "nextToken" : data?.ContinuationToken != undefined && data?.ContinuationToken != "" ? data?.ContinuationToken : "",
+          "items":childItems
+        });
       });
     });
   }
